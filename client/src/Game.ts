@@ -70,11 +70,8 @@ export class Game {
     this.ui = new UI();
 
     // Network
-    const wsUrl =
-      location.protocol === "https:"
-        ? `wss://${location.hostname}:3001`
-        : `ws://${location.hostname}:3001`;
-    this.network = new Network(wsUrl);
+    const wsUrl = import.meta.env.VITE_WS_URL as string;
+    this.network = new Network(wsUrl); this.network = new Network(wsUrl);
     this.setupNetworkHandlers();
 
     // Resize
