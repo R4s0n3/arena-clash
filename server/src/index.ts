@@ -1,10 +1,24 @@
 import { WebSocketServer } from "ws";
-import { GameRoom } from "./GameRoom.js";
+import http from "http";
+import { GameRoom } from "./GameRoom";
 
 const PORT = Number(process.env.PORT) || 3001;
 const MAX_PLAYERS_PER_ROOM = 16;
 
-const wss = new WebSocketServer({ port: PORT });
+const server = http.createServer((_req, res) => {
+  // Health check endpoint for hosting providers
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Arena Clash server running");
+});
+
+const wss = new WebSocketServer({
+  server,
+  verifyClient: ({ origin }, cb) => {
+    // Allow all origins (or restrict to your client domain)
+    cb(true);
+  },
+});
+
 const rooms: GameRoom[] = [new GameRoom(MAX_PLAYERS_PER_ROOM)];
 
 function findAvailableRoom(): GameRoom {
@@ -23,5 +37,8 @@ wss.on("connection", (ws) => {
   room.addPlayer(ws);
 });
 
-console.log(`⚔️  Arena Clash server running on ws://localhost:${PORT}`);
-console.log(`   Max ${MAX_PLAYERS_PER_ROOM} players per room`);
+server.listen(PORT, () => {
+  console.log(
+    `⚔️  Arena Clash server running on port ${PORT}`
+  );
+});
